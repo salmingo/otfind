@@ -343,27 +343,48 @@ bool scan_fits(const string &pathname, ftagvec &vec) {
 bool try_loadwcs(const string &filepath, param_wcs &wcs) {
 	// 检查cat是否存在. 若不存在, 则延时1秒等待, 直至出现
 	path pathcat = filepath;
+	int i(0), j(0), k(0);
 	pathcat.replace_extension(path(".cat"));
 	cout << "waiting for " << pathcat.filename().string();
-	while (!exists(pathcat)) {
+	while (!exists(pathcat) && ++k <= 2) {
 		boost::this_thread::sleep_for(boost::chrono::seconds(1));
 	}
-	cout << "\t\t Found" << endl;
-	// 检查wcs是否存在. 若不存在, 则延时1秒等待, 直至出现并且其大小不再变化
-	path pathwcs = filepath;
-	int i(0);
-	cout << "waiting for " << pathwcs.filename().string();
-	while (!exists(pathwcs) && ++i < 15) {
-		boost::this_thread::sleep_for(boost::chrono::seconds(1));
-	}
-	if (!exists(pathwcs)) {
+	if (!exists(pathcat)) {
 		cout << "\t\t !! Failed !!" << endl;
 		return false;
 	}
 	else
 		cout << "\t\t Found" << endl;
+	// 检查wcs是否存在. 若不存在, 则延时1秒等待, 直至出现并且其大小不再变化
+	path pathwcs = filepath;
 
-	return wcs.load_wcs(filepath);
+	cout << "waiting for " << pathwcs.filename().string();
+	if (!exists(pathwcs)) {// WCS不存在
+		// 先检查axy
+		path pathaxy = filepath;
+		pathaxy.replace_extension(path(".axy"));
+		if (!exists(pathaxy)) {
+			while (!exists(pathaxy) && ++i <= 2)
+				boost::this_thread::sleep_for(boost::chrono::seconds(1));
+			if (!exists(pathaxy)) {
+				cout << "\t\t !! Failed !!" << endl;
+				return false;
+			}
+		}
+
+		// 等待wcs
+		while (!exists(pathwcs) && ++j <= 20) {
+			boost::this_thread::sleep_for(boost::chrono::seconds(1));
+		}
+	}
+	if (!exists(pathwcs)) {
+		cout << "\t\t !! Failed !!" << endl;
+		return false;
+	}
+	else {
+		cout << "\t\t Found" << endl;
+		return wcs.load_wcs(filepath);
+	}
 }
 
 /*
@@ -384,21 +405,6 @@ int main(int argc, char **argv) {
 	ATimeSpace ats;
 	int fno(0);
 
-//	{	// 1: 遍历文件, 按文件名增量排序
-//		fs::directory_iterator itend = fs::directory_iterator();
-//		string extdef = ".wcs", extname;
-//		for (fs::directory_iterator x = fs::directory_iterator(pathroot);
-//				x != itend; ++x) {
-//			extname = x->path().filename().extension().string();
-//			if (extname == extdef) {
-//				file_tag tag;
-//				tag.filename = x->path().filename().string();
-//				tag.fno = resolve_file_sn(tag.filename.c_str());
-//				filevec.push_back(tag);
-//			}
-//		}
-//		sort(filevec.begin(), filevec.end(), inc_fno);
-//	}
 	if (!scan_fits(pathroot.string(), filevec)) {
 		cout << "require more files to find objects" << endl;
 		return -2;
@@ -447,11 +453,6 @@ int main(int argc, char **argv) {
 		pathcat.replace_extension(fs::path(".cat"));
 
 		// 2: 加载WCS信息
-//		if (!wcs.load_wcs(pathwcs.string())) {
-//			cout << "failed to load WCS from file: " << pathwcs.string()
-//					<< endl;
-//			continue;
-//		}
 		if (!try_loadwcs(pathwcs.string(), wcs)) {
 			cout << "failed to load WCS from file: " << pathwcs.string()
 					<< endl;
