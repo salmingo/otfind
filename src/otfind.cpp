@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <longnam.h>
 #include <fitsio.h>
 #include <boost/format.hpp>
@@ -280,7 +281,7 @@ int OutputObjects(AFindPV *finder, const char *dirDst, ATimeSpace &ats,
 			pt = *i;
 			ats.Mjd2Cal(pt->mjd, iy, im, id, fd);
 			Days2HMS(fd * 24.0, hh, mm, ss);
-			fprintf(fpdst, "%d %02d %02d %02d %02d %06.3f %4d %9.5f %9.5f ", iy,
+			fprintf(fpdst, "%d %02d %02d %02d %02d %06.3f %5d %9.5f %9.5f ", iy,
 					im, id, hh, mm, ss, pt->fno, pt->ra, pt->dc);
 			if (pt->mag > 20.0)
 				fprintf(fpdst, "99.99 ");
@@ -426,6 +427,7 @@ int main(int argc, char **argv) {
 			-90.0), er, ed, mjd;
 	double x, y, flux, fwhm, elon;
 	double limit = 60.0 / 3600.0;
+	double fluxmin, fwhmmin(1.5);
 	param_wcs wcs;
 	FILE *fp;
 	char line[100];
@@ -436,12 +438,14 @@ int main(int argc, char **argv) {
 	finder.SetTrackMode(trkmode);
 	if (trkmode)
 		finder.NewSequence();
+
 	for (ftagvec::iterator it = filevec.begin(); it != filevec.end();
 			++it) {
 		cout << (*it).fno << " : " << (*it).filename << endl;
 		fno = (*it).fno;
 		mjd = (*it).mjd;
 		expt = (*it).expt;
+		fluxmin = 4000.0 * expt;
 		finder.SetDimension(wimg = (*it).wimg, himg = (*it).himg);
 
 		fs::path pathfit = pathroot;
@@ -502,17 +506,16 @@ int main(int argc, char **argv) {
 			fwhm = atof(token);
 			token = strtok(NULL, seps);
 			elon = atof(token);
-			if (flux < 2000.0 || fwhm < 1E-6/* || elon < 2.0*/)
-				continue;
-
-			PPVPT pt = boost::make_shared<PVPT>();
-			pt->fno = fno;
-			pt->mjd = mjd;
-			pt->x = x;
-			pt->y = y;
-			wcs.image_to_wcs(x, y, pt->ra, pt->dc);
-			pt->mag = 25.0 - 2.5 * log10(flux / expt);
-			finder.AddPoint(pt);
+			if (flux >= fluxmin && fwhm >= fwhmmin) {
+				PPVPT pt = boost::make_shared<PVPT>();
+				pt->fno = fno;
+				pt->mjd = mjd;
+				pt->x = x;
+				pt->y = y;
+				wcs.image_to_wcs(x, y, pt->ra, pt->dc);
+				pt->mag = 25.0 - 2.5 * log10(flux / expt);
+				finder.AddPoint(pt);
+			}
 		}
 
 		fclose(fp);
