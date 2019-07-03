@@ -347,7 +347,7 @@ bool try_loadwcs(const string &filepath, param_wcs &wcs) {
 	int i(0), j(0), k(0);
 	pathcat.replace_extension(path(".cat"));
 	cout << "waiting for " << pathcat.filename().string();
-	while (!exists(pathcat) && ++k <= 2) {
+	while (!exists(pathcat) && ++k <= 0) {
 		boost::this_thread::sleep_for(boost::chrono::seconds(1));
 	}
 	if (!exists(pathcat)) {
@@ -365,7 +365,7 @@ bool try_loadwcs(const string &filepath, param_wcs &wcs) {
 		path pathaxy = filepath;
 		pathaxy.replace_extension(path(".axy"));
 		if (!exists(pathaxy)) {
-			while (!exists(pathaxy) && ++i <= 2)
+			while (!exists(pathaxy) && ++i <= 0)
 				boost::this_thread::sleep_for(boost::chrono::seconds(1));
 			if (!exists(pathaxy)) {
 				cout << "\t\t !! Failed !!" << endl;
@@ -374,7 +374,7 @@ bool try_loadwcs(const string &filepath, param_wcs &wcs) {
 		}
 
 		// 等待wcs
-		while (!exists(pathwcs) && ++j <= 20) {
+		while (!exists(pathwcs) && ++j <= 0) {
 			boost::this_thread::sleep_for(boost::chrono::seconds(1));
 		}
 	}
