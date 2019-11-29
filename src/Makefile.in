@@ -101,10 +101,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_otfind_OBJECTS = ATimeSpace.$(OBJEXT) AFindPV.$(OBJEXT) \
-	otfind.$(OBJEXT)
+am_otfind_OBJECTS = ACatalog.$(OBJEXT) ACatUCAC4.$(OBJEXT) \
+	AFindPV.$(OBJEXT) otfind.$(OBJEXT)
 otfind_OBJECTS = $(am_otfind_OBJECTS)
-otfind_DEPENDENCIES =
+am__DEPENDENCIES_1 =
+otfind_DEPENDENCIES = $(am__DEPENDENCIES_1)
 otfind_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(otfind_LDFLAGS) \
 	$(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
@@ -122,8 +123,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/AFindPV.Po ./$(DEPDIR)/ATimeSpace.Po \
-	./$(DEPDIR)/otfind.Po
+am__depfiles_remade = ./$(DEPDIR)/ACatUCAC4.Po ./$(DEPDIR)/ACatalog.Po \
+	./$(DEPDIR)/AFindPV.Po ./$(DEPDIR)/otfind.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -269,9 +270,14 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-otfind_SOURCES = ATimeSpace.cpp AFindPV.cpp otfind.cpp
+otfind_SOURCES = ACatalog.cpp ACatUCAC4.cpp AFindPV.cpp otfind.cpp
+@DEBUG_FALSE@AM_CFLAGS = -O3 -Wall
+@DEBUG_TRUE@AM_CFLAGS = -g3 -O0 -Wall -DNDEBUG
+@DEBUG_FALSE@AM_CXXFLAGS = -O3 -Wall
+@DEBUG_TRUE@AM_CXXFLAGS = -g3 -O0 -Wall -DNDEBUG
 otfind_LDFLAGS = -L/usr/local/lib
-otfind_LDADD = -lm -lcfitsio -lboost_filesystem-mt -lboost_system-mt -lboost_thread-mt -lboost_chrono-mt
+BOOST_LIBS = -lboost_system -lboost_date_time -lboost_filesystem -lboost_chrono
+otfind_LDADD = -lm -lcfitsio ${BOOST_LIBS}
 all: all-am
 
 .SUFFIXES:
@@ -358,8 +364,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ACatUCAC4.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ACatalog.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AFindPV.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ATimeSpace.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/otfind.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -509,8 +516,9 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/AFindPV.Po
-	-rm -f ./$(DEPDIR)/ATimeSpace.Po
+		-rm -f ./$(DEPDIR)/ACatUCAC4.Po
+	-rm -f ./$(DEPDIR)/ACatalog.Po
+	-rm -f ./$(DEPDIR)/AFindPV.Po
 	-rm -f ./$(DEPDIR)/otfind.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -557,8 +565,9 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/AFindPV.Po
-	-rm -f ./$(DEPDIR)/ATimeSpace.Po
+		-rm -f ./$(DEPDIR)/ACatUCAC4.Po
+	-rm -f ./$(DEPDIR)/ACatalog.Po
+	-rm -f ./$(DEPDIR)/AFindPV.Po
 	-rm -f ./$(DEPDIR)/otfind.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
